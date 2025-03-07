@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import styles from "./style/main.module.css";
 
 const WarframeData = () => {
   const [rivenItems, setRivenItems] = useState([]); // Alle Riven-Mods
@@ -65,11 +66,11 @@ const WarframeData = () => {
     <div>
     
       <h1>Warframe Market Data</h1>
-      <button onClick={() => fetchRivens()}></button>
+      <button onClick={() => fetchRivens()} className={"w-10 h-10"}></button>
       {loading ? <p>Lade Daten...</p> : (
         <ul>
           {auctions.map((item, index) => (
-            <li key={index} className={item.buyout_price < 100 ? "text-xl text-red-600" : ""}>
+            <li key={index} className={item.buyout_price > 100 ? "!text-l text-red-600" : ""}>
               {item.item.weapon_url_name} - {item.buyout_price} Plat (Verkäufer: {item.owner.ingame_name})
             </li>
           ))}
