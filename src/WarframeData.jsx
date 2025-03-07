@@ -3,21 +3,19 @@ import React, { useEffect, useState } from "react";
 const WarframeData = () => {
   const [rivenItems, setRivenItems] = useState([]); // Alle Riven-Mods
   const [auctions, setAuctions] = useState([]); // Auktionen für die Mods
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
     const fetchRivens = async () => {
       try {
-        const response = await fetch("https://api.warframe.market/v1/riven/items");
+        const response = await fetch("http://localhost:5500/warframe-riven");
         if (!response.ok) {
           throw new Error("Fehler beim Abrufen der Riven");
         }
         const jsonData = await response.json();
-        
+        setLoading(true);
         // Speichert die Waffen-URLs (um sie für die Auktionen zu verwenden)
-        const rivenList = jsonData.payload.items.map(item => item.url_name);
+        const rivenList = jsonData.payload.items.filter(riven => ["rifle"].includes(riven.riven_type)).map(riven => riven.url_name);
         setRivenItems(rivenList);
-
         // Direkt alle Auktionen abrufen
         fetchAllRivenAuctions(rivenList);
       } catch (error) {
@@ -30,9 +28,9 @@ const WarframeData = () => {
         const allAuctions = [];
 
         for (const weapon_url_name of rivenList) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        
           const response = await fetch(
-            `https://api.warframe.market/v1/auctions/search?type=riven&sort_by=price_asc&weapon_url_name=${weapon_url_name}`
+            `http://localhost:5500/warframe-auction?weapon_url_name=${weapon_url_name}`
           );
 
           if (!response.ok) {
@@ -60,16 +58,18 @@ const WarframeData = () => {
       }
     };
 
-    fetchRivens();
-  }, []);
+    
+
 
   return (
     <div>
+    
       <h1>Warframe Market Data</h1>
+      <button onClick={() => fetchRivens()}></button>
       {loading ? <p>Lade Daten...</p> : (
         <ul>
           {auctions.map((item, index) => (
-            <li key={index}>
+            <li key={index} className={item.buyout_price < 100 ? "text-xl text-red-600" : ""}>
               {item.item.weapon_url_name} - {item.buyout_price} Plat (Verkäufer: {item.owner.ingame_name})
             </li>
           ))}
